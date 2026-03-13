@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>XAUUSD ICT Smart Money Dashboard — March 2026</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --gold: #D4A843; --gold-light: #F5C842; --gold-dark: #A07820;
+    --bull: #00C896; --bear: #FF4B6E;
+    --bg-dark: #0A0D12; --bg-mid: #0F1318; --bg-card: #141922; --bg-card2: #1A2030;
+    --border: rgba(212,168,67,0.18); --border-bright: rgba(212,168,67,0.45);
+    --text-primary: #E8E0C8; --text-secondary: #8A9AB5; --text-dim: #4A5A72;
+    --mono: 'Share Tech Mono', monospace; --head: 'Rajdhani', sans-serif;
+  }
+  body { background: var(--bg-dark); color: var(--text-primary); font-family: var(--head); font-size: 14px; padding: 0; min-height: 100vh; }
+
+  .header {
+    background: linear-gradient(90deg,#0A0D12,#141922,#0A0D12);
+    border-bottom: 1px solid var(--border-bright);
+    padding: 14px 20px; display: flex; align-items: center; justify-content: space-between;
+    position: relative;
+  }
+  .header::after { content:''; position:absolute; bottom:-1px; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,var(--gold),transparent); }
+  .logo { display:flex; align-items:center; gap:12px; }
+  .logo-icon { width:38px; height:38px; background:linear-gradient(135deg,var(--gold-dark),var(--gold-light)); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:20px; box-shadow:0 0 16px rgba(212,168,67,0.3); }
+  .logo-text { font-size:20px; font-weight:700; letter-spacing:2px; color:var(--gold); }
+  .logo-sub { font-size:11px; color:var(--text-secondary); letter-spacing:3px; margin-top:1px; }
+
+  .price-big { text-align:center; }
+  .price-val { font-family:var(--mono); font-size:30px; color:var(--gold-light); letter-spacing:2px; }
+  .price-chg { font-size:12px; letter-spacing:1px; margin-top:2px; }
+  .bull-chg { color:var(--bull); } .bear-chg { color:var(--bear); }
+
+  .live-badge { display:flex; align-items:center; gap:8px; }
+  .live-dot { width:8px; height:8px; border-radius:50%; background:var(--bull); box-shadow:0 0 8px var(--bull); animation:pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
+  .live-info { font-size:11px; letter-spacing:1.5px; color:var(--text-secondary); }
+  .live-date { font-size:10px; color:var(--text-dim); font-family:var(--mono); }
+
+  .grid { display:grid; grid-template-columns:270px 1fr 215px; gap:10px; padding:12px; }
+
+  .card { background:var(--bg-card); border:1px solid var(--border); border-radius:10px; overflow:hidden; margin-bottom:10px; }
+  .card:last-child { margin-bottom:0; }
+  .card-header { display:flex; align-items:center; justify-content:space-between; padding:10px 14px 8px; border-bottom:1px solid var(--border); background:rgba(212,168,67,0.03); }
+  .card-title { font-size:11px; font-weight:600; letter-spacing:2.5px; color:var(--gold); text-transform:uppercase; }
+  .badge { font-size:10px; padding:2px 8px; border-radius:4px; font-family:var(--mono); }
+  .b-bull { background:rgba(0,200,150,0.12); color:var(--bull); border:1px solid rgba(0,200,150,0.25); }
+  .b-bear { background:rgba(255,75,110,0.12); color:var(--bear); border:1px solid rgba(255,75,110,0.25); }
+  .b-gold { background:rgba(212,168,67,0.1); color:var(--gold); border:1px solid rgba(212,168,67,0.2); }
+
+  .bias-wrap { padding:14px; }
+  .bias-lbl { font-size:10px; letter-spacing:2px; color:var(--text-secondary); margin-bottom:7px; }
+  .bias-bar { background:rgba(255,75,110,0.1); border-radius:6px; height:12px; overflow:hidden; border:1px solid var(--border); }
+  .bias-fill { height:100%; border-radius:6px; background:linear-gradient(90deg,var(--bull),#00FF9E); width:72%; box-shadow:0 0 10px rgba(0,200,150,0.4); }
+  .bias-ends { display:flex; justify-content:space-between; margin-top:4px; font-size:10px; }
+  .bias-score { text-align:center; padding:8px 0; }
+  .bias-num { font-family:var(--mono); font-size:30px; color:var(--bull); }
+  .bias-desc { font-size:11px; letter-spacing:2px; color:var(--text-secondary); }
+
+  .htf-list { padding:10px 12px; display:flex; flex-direction:column; gap:5px; }
+  .htf-row { display:flex; align-items:center; justify-content:space-between; padding:7px 10px; background:var(--bg-mid); border-radius:6px; border:1px solid var(--border); cursor:pointer; transition:border-color .2s; }
+  .htf-row:hover { border-color:var(--border-bright); }
+  .tf { font-size:11px; font-weight:600; letter-spacing:1.5px; color:var(--text-secondary); }
+  .st { font-size:13px; font-weight:700; }
+  .fib { font-family:var(--mono); font-size:11px; color:var(--text-dim); }
+  .bull-t { color:var(--bull); } .bear-t { color:var(--bear); } .gold-t { color:var(--gold); }
+
+  .lvl-wrap { padding:12px; }
+  .lvl-row { display:flex; align-items:center; justify-content:space-between; padding:6px 8px; margin-bottom:4px; border-radius:5px; border-left:3px solid; background:rgba(255,255,255,0.02); cursor:pointer; transition:background .2s; }
+  .lvl-row:hover { background:rgba(255,255,255,0.04); }
+  .lvl-row.res { border-color:var(--bear); } .lvl-row.sup { border-color:var(--bull); } .lvl-row.eq { border-color:var(--gold); }
+  .lvl-name { font-size:10px; letter-spacing:1px; color:var(--text-secondary); }
+  .lvl-price { font-family:var(--mono); font-size:13px; }
+  .lvl-dist { font-size:10px; color:var(--text-dim); font-family:var(--mono); }
+
+  .chart-tabs { display:flex; gap:2px; padding:0 14px; border-bottom:1px solid var(--border); background:rgba(212,168,67,0.03); }
+  .tab { padding:7px 13px; font-size:11px; letter-spacing:1.5px; font-weight:600; cursor:pointer; border-bottom:2px solid transparent; transition:all .2s; color:var(--text-dim); }
+  .tab.active { color:var(--gold); border-bottom-color:var(--gold); }
+
+  .con-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:7px; padding:12px; }
+  .con-card { background:var(--bg-mid); border:1px solid var(--border); border-radius:8px; padding:9px; cursor:pointer; transition:all .2s; }
+  .con-card:hover { border-color:var(--border-bright); background:var(--bg-card2); }
+  .con-card.active { border-color:var(--gold); background:rgba(212,168,67,0.06); }
+  .con-name { font-size:10px; font-weight:700; letter-spacing:1.5px; margin:4px 0 2px; }
+  .con-st { font-size:10px; letter-spacing:.8px; }
+
+  .info-box { padding:10px 14px; font-size:12px; line-height:1.65; color:var(--text-secondary); display:none; border-top:1px solid var(--border); background:rgba(0,0,0,0.15); }
+  .info-box.on { display:block; }
+  .info-box strong { color:var(--gold-light); }
+
+  .kz-list { padding:10px 12px; display:flex; flex-direction:column; gap:5px; }
+  .kz-row { display:flex; align-items:center; gap:9px; padding:7px 9px; background:var(--bg-mid); border-radius:6px; border:1px solid var(--border); }
+  .kz-row.active { border-color:var(--gold); background:rgba(212,168,67,0.07); }
+  .kz-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+  .kz-name { font-size:11px; font-weight:600; letter-spacing:1px; flex:1; }
+  .kz-time { font-family:var(--mono); font-size:10px; color:var(--text-dim); }
+  .kz-vol { font-size:10px; letter-spacing:.8px; }
+
+  .setup-wrap { padding:12px; }
+  .dir-btns { display:flex; gap:6px; margin-bottom:10px; }
+  .dir-btn { flex:1; padding:8px; border:1px solid var(--border); border-radius:6px; text-align:center; cursor:pointer; font-family:var(--head); font-size:12px; font-weight:700; letter-spacing:2px; background:transparent; color:var(--text-secondary); transition:all .2s; }
+  .dir-btn:hover { border-color:var(--border-bright); color:var(--text-primary); }
+  .d-bull { border-color:var(--bull); background:rgba(0,200,150,0.1); color:var(--bull); }
+  .d-bear { border-color:var(--bear); background:rgba(255,75,110,0.1); color:var(--bear); }
+  .field-row { display:flex; justify-content:space-between; align-items:center; padding:5px 8px; background:var(--bg-mid); border-radius:5px; border:1px solid var(--border); margin-bottom:4px; }
+  .f-lbl { font-size:10px; letter-spacing:1.5px; color:var(--text-secondary); }
+  .f-val { font-family:var(--mono); font-size:13px; }
+  .rr-box { text-align:center; padding:9px; background:rgba(212,168,67,0.06); border:1px solid var(--border-bright); border-radius:7px; margin:8px 0; }
+  .rr-lbl { font-size:10px; letter-spacing:2px; color:var(--text-secondary); margin-bottom:2px; }
+  .rr-val { font-family:var(--mono); font-size:24px; color:var(--gold-light); }
+  .trade-btn { width:100%; padding:10px; border:none; border-radius:7px; font-family:var(--head); font-size:13px; font-weight:700; letter-spacing:2px; cursor:pointer; transition:all .2s; }
+  .btn-bull { background:linear-gradient(90deg,#006B4F,#00C896); color:#fff; box-shadow:0 4px 16px rgba(0,200,150,0.25); }
+  .btn-bull:hover { box-shadow:0 4px 22px rgba(0,200,150,0.4); transform:translateY(-1px); }
+  .btn-bear { background:linear-gradient(90deg,#6A0020,#FF4B6E); color:#fff; box-shadow:0 4px 16px rgba(255,75,110,0.25); }
+
+  .cot-wrap { padding:12px; }
+  .cot-row { margin-bottom:9px; }
+  .cot-head { display:flex; justify-content:space-between; margin-bottom:3px; }
+  .cot-nm { font-size:10px; letter-spacing:1.5px; color:var(--text-secondary); }
+  .cot-n { font-family:var(--mono); font-size:11px; }
+  .cot-bg { background:rgba(255,255,255,0.05); border-radius:4px; height:8px; overflow:hidden; }
+  .cot-fill { height:100%; border-radius:4px; }
+  .cot-signal { margin-top:8px; padding:8px; background:rgba(212,168,67,0.06); border:1px solid var(--border); border-radius:6px; font-size:11px; color:var(--bull); font-weight:600; letter-spacing:.8px; }
+  .cot-sig-lbl { font-size:9px; letter-spacing:1.5px; color:var(--text-secondary); margin-bottom:2px; }
+
+  .ctx-banner { background:rgba(255,75,110,0.06); border:1px solid rgba(255,75,110,0.2); border-radius:7px; padding:8px 12px; margin:10px 12px; font-size:11px; color:#FF8FAA; letter-spacing:.8px; }
+  .ctx-banner strong { color:var(--bear); }
+
+  ::-webkit-scrollbar { width:3px; }
+  ::-webkit-scrollbar-track { background:var(--bg-dark); }
+  ::-webkit-scrollbar-thumb { background:var(--border-bright); border-radius:2px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">
+    <div class="logo-icon">⬡</div>
+    <div>
+      <div class="logo-text">XAUUSD · ICT</div>
+      <div class="logo-sub">SMART MONEY DASHBOARD</div>
+    </div>
+  </div>
+  <div class="price-big">
+    <div class="price-val" id="livePrice">5,062.40</div>
+    <div class="price-chg bull-chg" id="priceChg">▲ +983.20 (+24.1%) منذ يناير</div>
+  </div>
+  <div class="live-badge">
+    <div class="live-dot"></div>
+    <div>
+      <div class="live-info">14 مارس 2026</div>
+      <div class="live-date" id="sessionTime">-- : -- UTC</div>
+    </div>
+  </div>
+</div>
+
+<div class="grid">
+
+  <!-- LEFT -->
+  <div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">⚡ ICT MARKET BIAS</div>
+        <div class="badge b-bull">BULLISH</div>
+      </div>
+      <div class="bias-wrap">
+        <div class="bias-lbl">BULL / BEAR PRESSURE</div>
+        <div class="bias-bar"><div class="bias-fill"></div></div>
+        <div class="bias-ends"><span style="color:var(--bear)">BEAR</span><span style="color:var(--bull)">BULL</span></div>
+        <div class="bias-score">
+          <div class="bias-num">72</div>
+          <div class="bias-desc">STRONGLY BULLISH</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">📊 HTF STRUCTURE</div>
+        <div class="badge b-bull">BOS ✓</div>
+      </div>
+      <div class="htf-list">
+        <div class="htf-row" onclick="info('Monthly','Monthly Bullish: انطلق الذهب من $2,957 ووصل $5,595 كقمة تاريخية. الهيكل صاعد بوضوح. المؤسسات تتراكم والبنوك المركزية تشتري. التحيز: LONG بقوة.')">
+          <span class="tf">MN</span><span class="st bull-t">BULLISH ↑</span><span class="fib">ATH</span>
+        </div>
+        <div class="htf-row" onclick="info('Weekly','Weekly: كسر هيكل صعودي (BOS) فوق $4,800. الآن في مرحلة توزيع/تصحيح بعد القمة $5,595. انتظر OB أسبوعي عند $4,994 للمراجعة.')">
+          <span class="tf">W1</span><span class="st bull-t">BOS ↑</span><span class="fib">PDA</span>
+        </div>
+        <div class="htf-row" onclick="info('Daily','Daily: تصحيح من $5,595 إلى $5,019 (نطاق اليوم). FVG يومي عند $5,100-5,150. OB يومي صاعد عند $4,994. السعر يختبر منطقة OTE الآن.')">
+          <span class="tf">D1</span><span class="st gold-t">OTE ZONE</span><span class="fib">61.8%</span>
+        </div>
+        <div class="htf-row" onclick="info('4H','4H: CHoCH صاعد عند $5,040. OB رابع ساعات صاعد عند $5,020-5,035. FVG H4 عند $5,070-5,090. الإعداد يتشكل للدخول LONG إذا تراجع السعر للـ OB.')">
+          <span class="tf">H4</span><span class="st bull-t">CHoCH ↑</span><span class="fib">OB</span>
+        </div>
+        <div class="htf-row" onclick="info('1H','1H: AMD Formation — Accumulation عند $5,040-5,065. الساعة 12-15 UTC (NY Killzone) الأهم. FVG ساعة عند $5,078-5,092. هدف BSL: $5,200.')">
+          <span class="tf">H1</span><span class="st gold-t">AMD PHASE</span><span class="fib">M</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">🎯 KEY PRICE LEVELS</div>
+        <div class="badge b-gold">ICT PDA</div>
+      </div>
+      <div class="lvl-wrap">
+        <div class="lvl-row res" onclick="info('BSL Target','$5,200 — Buy Side Liquidity. قمم متساوية (EQH) تجذب السعر. المؤسسات ستسحب السيولة فوق هذا المستوى قبل الانعكاس أو الاستمرار.')">
+          <span class="lvl-name">EQH · BSL</span>
+          <span class="lvl-price bear-t">5,200.00</span>
+          <span class="lvl-dist">+137.6</span>
+        </div>
+        <div class="lvl-row res" onclick="info('Daily FVG','$5,100-5,150 — FVG يومي غير مملوء. فجوة قيمة عادلة تعمل كمقاومة أولى. السعر قد يملأها قبل الاستمرار.')">
+          <span class="lvl-name">FVG · DAILY</span>
+          <span class="lvl-price bear-t">5,128.00</span>
+          <span class="lvl-dist">+65.6</span>
+        </div>
+        <div class="lvl-row eq" onclick="info('Current Price','XAUUSD حالياً عند ~$5,062. نطاق اليوم: $5,019-5,128.')">
+          <span class="lvl-name">◉ CURRENT</span>
+          <span class="lvl-price gold-t" id="curPrice">5,062.40</span>
+          <span class="lvl-dist">—</span>
+        </div>
+        <div class="lvl-row sup" onclick="info('4H OB Support','$5,020-5,035 — Order Block رابع ساعات صاعد. منطقة دخول عالية الاحتمالية. Entry: $5,025 SL: $5,010 TP: $5,200.')">
+          <span class="lvl-name">OB · H4 BULL</span>
+          <span class="lvl-price bull-t">5,028.00</span>
+          <span class="lvl-dist">-34.4</span>
+        </div>
+        <div class="lvl-row sup" onclick="info('Weekly OB','$4,994-5,000 — Order Block أسبوعي. حد نفسي مهم. دعم قوي جداً. كسره لأسفل = إلغاء التحيز الصاعد قصير الأمد.')">
+          <span class="lvl-name">OB · W1 BULL</span>
+          <span class="lvl-price bull-t">4,994.00</span>
+          <span class="lvl-dist">-68.4</span>
+        </div>
+        <div class="lvl-row sup" onclick="info('SSL Protection','$4,937 — Sell Side Liquidity. قيعان متساوية. كسرها = صيد وقف الخسارة قبل الارتداد الصاعد.')">
+          <span class="lvl-name">EQL · SSL</span>
+          <span class="lvl-price bull-t">4,937.00</span>
+          <span class="lvl-dist">-125.4</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CENTER -->
+  <div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">📈 PRICE ACTION · ICT MARKUP</div>
+        <div class="badge b-gold" id="activeBadge">ORDER BLOCKS</div>
+      </div>
+      <div class="chart-tabs">
+        <div class="tab" onclick="switchTab(this)">M15</div>
+        <div class="tab active" onclick="switchTab(this)">H1</div>
+        <div class="tab" onclick="switchTab(this)">H4</div>
+        <div class="tab" onclick="switchTab(this)">D1</div>
+      </div>
+      <div class="ctx-banner">
+        <strong>⚠ تحديث مارس 2026:</strong> الذهب ارتفع من ~$3,082 إلى <strong>$5,062</strong> — زيادة 64%. السياق الجيوسياسي يدفع الأسعار.
+      </div>
+      <div style="padding:0 12px 12px">
+        <svg id="mainChart" width="100%" viewBox="0 0 660 280" style="display:block"></svg>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">🧠 ICT CONCEPTS ACTIVE</div>
+        <div class="badge b-gold">CLICK TO ANALYZE</div>
+      </div>
+      <div class="con-grid">
+        <div class="con-card active" onclick="activateCon(this,'ORDER BLOCK','OB','Bullish 4H OB عند $5,020-5,035. آخر شمعة هبوطية قبل الاندفاع. الدخول المثالي: Limit عند $5,028. SL: $5,008. TP1: $5,128 (FVG). TP2: $5,200 (BSL). R:R = 1:8.6')">
+          <div style="font-size:16px">🟦</div>
+          <div class="con-name">ORDER BLOCK</div>
+          <div class="con-st bull-t">UNTESTED · H4</div>
+        </div>
+        <div class="con-card" onclick="activateCon(this,'FAIR VALUE GAP','FVG','FVGs نشطة: H1 عند $5,078-5,092، D1 عند $5,100-5,150. السعر الحالي تحت كلاهما — انتبه لردة فعل عندها.')">
+          <div style="font-size:16px">⬜</div>
+          <div class="con-name">FAIR VALUE GAP</div>
+          <div class="con-st bull-t">2 ACTIVE · H1/D1</div>
+        </div>
+        <div class="con-card" onclick="activateCon(this,'LIQUIDITY SWEEP','LSW','تم سحب BSL عند $5,128 خلال جلسة لندن. الآن السعر يتراجع لاختبار OB H4. نموذج ICT كلاسيكي: Stop Hunt → Reversal.')">
+          <div style="font-size:16px">💧</div>
+          <div class="con-name">LIQUIDITY</div>
+          <div class="con-st bear-t">BSL SWEPT</div>
+        </div>
+        <div class="con-card" onclick="activateCon(this,'OPTIMAL TRADE ENTRY','OTE','OTE (61.8%-79%) بين $5,020-5,045. يتزامن مع OB H4. أفضل نموذج دخول ICT للجلسة الحالية.')">
+          <div style="font-size:16px">🎯</div>
+          <div class="con-name">OTE ZONE</div>
+          <div class="con-st gold-t">61.8% · $5,028</div>
+        </div>
+        <div class="con-card" onclick="activateCon(this,'BREAKER BLOCK','BRK','Bearish Breaker عند $5,150. عند وصول السعر لـ $5,140-5,155 → فرصة Short سكالب بـ SL ضيق.')">
+          <div style="font-size:16px">🔴</div>
+          <div class="con-name">BREAKER</div>
+          <div class="con-st bear-t">D1 SUPPLY ZONE</div>
+        </div>
+        <div class="con-card" onclick="activateCon(this,'MARKET STRUCTURE SHIFT','MSS','CHoCH صاعد تأكد في H4 عند $5,040. BOS فوق $5,128 سيؤكد الاتجاه. الهدف $5,200-5,500.')">
+          <div style="font-size:16px">↕️</div>
+          <div class="con-name">MSS / CHoCH</div>
+          <div class="con-st bull-t">CHoCH CONFIRMED</div>
+        </div>
+      </div>
+      <div class="info-box" id="infoBox">اضغط على أي مستوى أو مفهوم ICT للتحليل التفصيلي</div>
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">⏰ ICT KILLZONES</div>
+        <div class="badge b-bull">NY OPEN</div>
+      </div>
+      <div class="kz-list">
+        <div class="kz-row">
+          <div class="kz-dot" style="background:#6B8EFF"></div>
+          <div><div class="kz-name" style="color:#6B8EFF">ASIA</div><div class="kz-time">20:00–00:00</div></div>
+          <div class="kz-vol" style="color:var(--text-dim)">CLOSED</div>
+        </div>
+        <div class="kz-row">
+          <div class="kz-dot" style="background:#FFD166"></div>
+          <div><div class="kz-name" style="color:#FFD166">LONDON OPEN</div><div class="kz-time">02:00–05:00</div></div>
+          <div class="kz-vol bear-t">SWEPT BSL</div>
+        </div>
+        <div class="kz-row active">
+          <div class="kz-dot" style="background:var(--bull);box-shadow:0 0 8px var(--bull);animation:pulse 1.5s infinite"></div>
+          <div><div class="kz-name bull-t">NEW YORK ◉</div><div class="kz-time">12:00–15:00</div></div>
+          <div class="kz-vol bull-t">ACTIVE</div>
+        </div>
+        <div class="kz-row">
+          <div class="kz-dot" style="background:#FF6B9D"></div>
+          <div><div class="kz-name" style="color:#FF6B9D">NY PM REVERSAL</div><div class="kz-time">17:00–20:00</div></div>
+          <div class="kz-vol" style="color:var(--text-dim)">PENDING</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">📐 TRADE SETUP</div>
+        <div class="badge b-bull">ICT MODEL</div>
+      </div>
+      <div class="setup-wrap">
+        <div class="dir-btns">
+          <button class="dir-btn d-bull" id="btnLong" onclick="setDir('LONG')">▲ LONG</button>
+          <button class="dir-btn" id="btnShort" onclick="setDir('SHORT')">▼ SHORT</button>
+        </div>
+        <div class="field-row"><span class="f-lbl">ENTRY (OB MID)</span><span class="f-val bull-t" id="fEntry">5,028.00</span></div>
+        <div class="field-row"><span class="f-lbl">STOP LOSS</span><span class="f-val bear-t" id="fSL">5,008.00</span></div>
+        <div class="field-row"><span class="f-lbl">TP1 (FVG H1)</span><span class="f-val bull-t" id="fTP1">5,092.00</span></div>
+        <div class="field-row"><span class="f-lbl">TP2 (BSL)</span><span class="f-val bull-t" id="fTP2">5,200.00</span></div>
+        <div class="rr-box">
+          <div class="rr-lbl">RISK : REWARD</div>
+          <div class="rr-val" id="fRR">1 : 8.6</div>
+        </div>
+        <button class="trade-btn btn-bull" id="tradeBtn" onclick="alert('📋 Paper Trade:\nLONG XAUUSD @ 5,028\nSL: 5,008 | TP1: 5,092 | TP2: 5,200\nR:R = 1:8.6')">PAPER TRADE LONG ▲</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">📋 COT POSITIONING</div>
+        <div class="badge b-bull">MANAGED MONEY</div>
+      </div>
+      <div class="cot-wrap">
+        <div class="cot-row">
+          <div class="cot-head"><span class="cot-nm">MANAGED MONEY LONG</span><span class="cot-n bull-t">+248,440</span></div>
+          <div class="cot-bg"><div class="cot-fill" style="width:91%;background:linear-gradient(90deg,#006B4F,var(--bull))"></div></div>
+        </div>
+        <div class="cot-row">
+          <div class="cot-head"><span class="cot-nm">MANAGED MONEY SHORT</span><span class="cot-n bear-t">-28,120</span></div>
+          <div class="cot-bg"><div class="cot-fill" style="width:18%;background:linear-gradient(90deg,#7A0026,var(--bear))"></div></div>
+        </div>
+        <div class="cot-row">
+          <div class="cot-head"><span class="cot-nm">COMMERCIALS NET</span><span class="cot-n bear-t">-220,320</span></div>
+          <div class="cot-bg"><div class="cot-fill" style="width:74%;background:linear-gradient(90deg,#5A3000,#D4A843)"></div></div>
+        </div>
+        <div class="cot-signal">
+          <div class="cot-sig-lbl">COT SIGNAL</div>
+          ▲ تراكم مؤسسي قوي — مضارعون طويلو الأمد يشترون الذهب
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function drawChart() {
+  const svg = document.getElementById('mainChart');
+  const W=660, H=280;
+  const candles = [
+    [32,200,190,205,185],[57,190,175,195,170],[82,175,162,180,158],
+    [107,162,170,174,158],[132,170,183,188,165],[157,183,175,190,172],
+    [182,175,165,178,160],[207,165,155,168,150],[232,155,148,160,145],
+    [257,148,158,163,144],[282,158,168,172,155],[307,168,178,182,164],
+    [332,178,188,193,174],[357,188,195,200,184],[382,195,185,198,180],
+    [407,185,175,188,170],[432,175,165,178,160],[457,165,180,185,160],
+    [482,180,192,196,178],[507,192,205,210,188],[532,205,215,220,200],
+    [557,215,208,222,205],[582,208,218,224,204],[607,218,228,234,215],
+    [632,228,222,236,218]
+  ];
+  const priceMin=4960, priceMax=5240;
+  const py = p => 240 - ((p-priceMin)/(priceMax-priceMin))*220;
+  const levels = [
+    {p:5200,c:'rgba(255,75,110,0.5)',lbl:'BSL 5,200',dash:'6,4'},
+    {p:5128,c:'rgba(255,75,110,0.3)',lbl:'FVG 5,128',dash:'4,4'},
+    {p:5092,c:'rgba(212,168,67,0.4)',lbl:'FVG H1 5,092',dash:'4,4'},
+    {p:5062,c:'rgba(245,200,66,0.7)',lbl:'',dash:'3,3'},
+    {p:5028,c:'rgba(0,200,150,0.3)',lbl:'OB H4 5,028',dash:'3,3'},
+    {p:4994,c:'rgba(0,200,150,0.5)',lbl:'SSL 4,994',dash:'6,4'},
+  ];
+  let h = `<defs><marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5"/></marker></defs>`;
+  for(let i=0;i<6;i++){const y=20+i*40;h+=`<line x1="25" y1="${y}" x2="${W-10}" y2="${y}" stroke="rgba(212,168,67,0.05)" stroke-width="0.5"/>`;}
+  [5200,5150,5100,5050,5000,4960].forEach(p=>{const y=py(p);if(y>10&&y<270)h+=`<text x="22" y="${y+4}" fill="#4A5A72" font-size="9" font-family="'Share Tech Mono',monospace" text-anchor="end">${p}</text>`;});
+  levels.forEach(lv=>{const y=py(lv.p);h+=`<line x1="25" y1="${y}" x2="${W-10}" y2="${y}" stroke="${lv.c}" stroke-width="0.8" stroke-dasharray="${lv.dash}"/>`;if(lv.lbl)h+=`<text x="${W-8}" y="${y-3}" fill="${lv.c.replace(/[\d.]+\)$/,'0.85)')}" font-size="8" font-family="'Share Tech Mono',monospace" text-anchor="end">${lv.lbl}</text>`;});
+  h+=`<rect x="25" y="${py(5035)}" width="${W-35}" height="${py(5020)-py(5035)}" fill="rgba(0,200,150,0.07)" stroke="rgba(0,200,150,0.3)" stroke-width="0.7" stroke-dasharray="3,3" rx="2"/>`;
+  h+=`<text x="30" y="${py(5028)+4}" fill="rgba(0,200,150,0.65)" font-size="9" font-family="'Rajdhani',sans-serif" letter-spacing="1">4H BULL OB · 5,020-5,035</text>`;
+  h+=`<rect x="25" y="${py(5092)}" width="${W-35}" height="${py(5078)-py(5092)}" fill="rgba(212,168,67,0.06)" stroke="rgba(212,168,67,0.25)" stroke-width="0.7" stroke-dasharray="3,3" rx="2"/>`;
+  candles.forEach(([cx,o,c,hi,lo])=>{
+    const bull=c>=o; const col=bull?'#00C896':'#FF4B6E';
+    const f=v=>py(priceMin+(v/240)*(priceMax-priceMin));
+    const fO=f(o),fC=f(c),fH=f(hi),fL=f(lo);
+    h+=`<line x1="${cx}" y1="${fH}" x2="${cx}" y2="${fL}" stroke="${col}" stroke-width="1" opacity="0.7"/>`;
+    const bTop=Math.min(fO,fC),bH=Math.max(Math.abs(fC-fO),2);
+    h+=`<rect x="${cx-6}" y="${bTop}" width="12" height="${bH}" fill="${col}" opacity="${bull?'0.85':'0.7'}" rx="1"/>`;
+  });
+  const curY=py(5062);
+  h+=`<line x1="25" y1="${curY}" x2="${W-10}" y2="${curY}" stroke="rgba(245,200,66,0.7)" stroke-width="1.2" stroke-dasharray="4,3"/>`;
+  h+=`<rect x="${W-78}" y="${curY-10}" width="68" height="18" fill="rgba(212,168,67,0.2)" stroke="rgba(212,168,67,0.6)" stroke-width="0.8" rx="4"/>`;
+  h+=`<text x="${W-44}" y="${curY+4}" fill="#F5C842" font-size="9" font-family="'Share Tech Mono',monospace" text-anchor="middle">5,062.40</text>`;
+  h+=`<circle cx="507" cy="${py(5000)}" r="5" fill="none" stroke="#D4A843" stroke-width="1.5"/>`;
+  h+=`<text x="515" y="${py(5000)-6}" fill="#D4A843" font-size="9" font-family="'Rajdhani',sans-serif">CHoCH</text>`;
+  h+=`<path d="M557 ${py(5095)} L607 ${py(5130)}" stroke="rgba(0,200,150,0.8)" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>`;
+  h+=`<text x="612" y="${py(5135)}" fill="rgba(0,200,150,0.8)" font-size="9" font-family="'Rajdhani',sans-serif">BOS</text>`;
+  svg.innerHTML = h;
+}
+
+let liveP = 5062.40;
+function updatePrice() {
+  liveP += (Math.random()-0.48)*1.8;
+  liveP = Math.max(5040, Math.min(5090, liveP));
+  const fmt = v => v.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,',');
+  document.getElementById('livePrice').textContent = fmt(liveP);
+  document.getElementById('curPrice').textContent = fmt(liveP);
+}
+setInterval(updatePrice, 1400);
+
+function updateClock() {
+  const n=new Date();
+  document.getElementById('sessionTime').textContent =
+    n.getUTCHours().toString().padStart(2,'0')+':'+n.getUTCMinutes().toString().padStart(2,'0')+' UTC';
+}
+setInterval(updateClock,10000); updateClock();
+
+function info(title, text) {
+  const b=document.getElementById('infoBox');
+  b.innerHTML=`<strong>${title}:</strong> ${text}`;
+  b.classList.add('on');
+}
+
+function activateCon(el, name, badge, text) {
+  document.querySelectorAll('.con-card').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('activeBadge').textContent=badge;
+  info(name, text);
+}
+
+function switchTab(el) {
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function setDir(d) {
+  const bL=document.getElementById('btnLong'), bS=document.getElementById('btnShort');
+  const btn=document.getElementById('tradeBtn');
+  if(d==='LONG'){
+    bL.className='dir-btn d-bull'; bS.className='dir-btn';
+    document.getElementById('fEntry').textContent='5,028.00';
+    document.getElementById('fEntry').className='f-val bull-t';
+    document.getElementById('fSL').textContent='5,008.00';
+    document.getElementById('fTP1').textContent='5,092.00';
+    document.getElementById('fTP2').textContent='5,200.00';
+    document.getElementById('fRR').textContent='1 : 8.6';
+    btn.className='trade-btn btn-bull';
+    btn.textContent='PAPER TRADE LONG ▲';
+    btn.onclick=()=>alert('📋 Paper Trade:\nLONG XAUUSD @ 5,028\nSL: 5,008 | TP1: 5,092 | TP2: 5,200\nR:R = 1:8.6');
+  } else {
+    bS.className='dir-btn d-bear'; bL.className='dir-btn';
+    document.getElementById('fEntry').textContent='5,150.00';
+    document.getElementById('fEntry').className='f-val bear-t';
+    document.getElementById('fSL').textContent='5,165.00';
+    document.getElementById('fTP1').textContent='5,090.00';
+    document.getElementById('fTP2').textContent='5,028.00';
+    document.getElementById('fRR').textContent='1 : 8.1';
+    btn.className='trade-btn btn-bear';
+    btn.textContent='PAPER TRADE SHORT ▼';
+    btn.onclick=()=>alert('📋 Paper Trade:\nSHORT XAUUSD @ 5,150\nSL: 5,165 | TP1: 5,090 | TP2: 5,028\nR:R = 1:8.1');
+  }
+}
+
+drawChart();
+</script>
+</body>
+</html>
